@@ -2,6 +2,15 @@
 
 A minimal pkg-config implementation written in Go. This tool provides basic pkg-config functionality for simple use cases, only processing .pc files from PKG_CONFIG_PATH.
 
+
+[![Build Status](https://github.com/cpunion/tiny-pkg-config/actions/workflows/go.yml/badge.svg)](https://github.com/cpunion/tiny-pkg-config/actions/workflows/go.yml)
+[![codecov](https://codecov.io/github/cpunion/tiny-pkg-config/graph/badge.svg?token=DZ2EGph4Qq)](https://codecov.io/github/cpunion/tiny-pkg-config)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/cpunion/tiny-pkg-config)
+[![GitHub commits](https://badgen.net/github/commits/cpunion/tiny-pkg-config)](https://GitHub.com/Naereen/cpunion/tiny-pkg-config/commit/)
+[![GitHub release](https://img.shields.io/github/v/tag/cpunion/tiny-pkg-config.svg?label=release)](https://github.com/cpunion/tiny-pkg-config/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cpunion/tiny-pkg-config)](https://goreportcard.com/report/github.com/cpunion/tiny-pkg-config)
+[![Go Reference](https://pkg.go.dev/badge/github.com/cpunion/tiny-pkg-config.svg)](https://pkg.go.dev/github.com/cpunion/tiny-pkg-config)
+
 ## Features
 
 - Basic .pc file parsing
