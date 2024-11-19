@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -14,8 +16,8 @@ type PkgConfig struct {
 	Name        string
 	Description string
 	Version     string
-	Libs        []string
-	Cflags      []string
+	Libs        string
+	Cflags      string
 	Variables   map[string]string
 	Requires    []string
 }
@@ -27,12 +29,25 @@ func parsePkgConfig(filename string) (*PkgConfig, error) {
 		return nil, err
 	}
 	defer file.Close()
+	return parsePkgConfig_(filename, file)
+}
 
+func toSlash(path string) string {
+	if runtime.GOOS == "windows" {
+		return filepath.ToSlash(path)
+	}
+	return path
+}
+
+func parsePkgConfig_(filename string, reader io.Reader) (*PkgConfig, error) {
 	pkg := &PkgConfig{
 		Variables: make(map[string]string),
 	}
 
-	scanner := bufio.NewScanner(file)
+	// Set pcfiledir predefined variable
+	pkg.Variables["pcfiledir"] = toSlash(filepath.Dir(filename))
+
+	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" || strings.HasPrefix(line, "#") {
@@ -53,9 +68,9 @@ func parsePkgConfig(filename string) (*PkgConfig, error) {
 			case "Version":
 				pkg.Version = value
 			case "Libs":
-				pkg.Libs = strings.Fields(value)
+				pkg.Libs = value
 			case "Cflags":
-				pkg.Cflags = strings.Fields(value)
+				pkg.Cflags = value
 			case "Requires":
 				pkg.Requires = strings.Split(value, ",")
 				for i, req := range pkg.Requires {
@@ -70,6 +85,10 @@ func parsePkgConfig(filename string) (*PkgConfig, error) {
 			pkg.Variables[key] = value
 		}
 	}
+
+	// Expand all variables in Libs and Cflags one more time
+	pkg.Libs = expandVariables(pkg.Libs, pkg.Variables)
+	pkg.Cflags = expandVariables(pkg.Cflags, pkg.Variables)
 
 	return pkg, scanner.Err()
 }
@@ -86,7 +105,7 @@ func expandVariables(value string, vars map[string]string) string {
 func findPkgConfig(name string) (string, error) {
 	paths := getPkgConfigPaths()
 	for _, path := range paths {
-		pcFile := filepath.Join(path, name+".pc")
+		pcFile := path + "/" + name + ".pc"
 		if _, err := os.Stat(pcFile); err == nil {
 			return pcFile, nil
 		}
@@ -136,8 +155,8 @@ func main() {
 	// Output results
 	switch {
 	case *libs:
-		fmt.Println(strings.Join(pkg.Libs, " "))
+		fmt.Println(pkg.Libs)
 	case *cflags:
-		fmt.Println(strings.Join(pkg.Cflags, " "))
+		fmt.Println(pkg.Cflags)
 	}
 }
